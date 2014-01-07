@@ -77,7 +77,7 @@ namespace Websocket {
                 std::string::size_type pos = line.find(": ");
                 if (pos != std::string::npos) {
                     std::string key = line.substr(0, pos);
-                    for (int i = 0; i < key.length(); ++i) {
+                    for (size_t i = 0; i < key.length(); ++i) {
                         key[i] = tolower(key[i]);
                     }
                     headers[key] = line.substr(pos + 2);

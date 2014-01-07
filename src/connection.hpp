@@ -148,5 +148,6 @@ public:
 };
 
 typedef intrusive_ptr<ConnectionInstance> ConnectionPtr;
+typedef list<ConnectionPtr> clst_t;
 
 #endif //CONNECTION_H

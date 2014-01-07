@@ -200,9 +200,17 @@ fail:
     return FERR_BAD_SYNTAX;
 }
 
-void SearchFilterList(const json_t* node, list<ConnectionPtr>& conlist, string item) {
+void SearchFilterList(const json_t* json_root,
+        clst_t& users_to_search,
+        const char* json_field,
+        string item) {
+    
+    json_t* node = json_object_get(json_root, json_field);
+    if (!json_is_array(node))
+        return;
+
     unordered_set<string> items;
-    list<ConnectionPtr> toremove;
+    clst_t toremove;
     size_t size = json_array_size(node);
     for (size_t i = 0; i < size; ++i) {
         json_t* jn = json_array_get(node, i);
@@ -210,19 +218,19 @@ void SearchFilterList(const json_t* node, list<ConnectionPtr>& conlist, string i
             items.insert(json_string_value(jn));
     }
 
-    for (list<ConnectionPtr>::iterator i = conlist.begin(); i != conlist.end(); ++i) {
+    for (clst_t::iterator i = users_to_search.begin(); i != users_to_search.end(); ++i) {
         if (items.find((*i)->infotagMap[item]) == items.end())
             toremove.push_back((*i));
     }
 
-    for (list<ConnectionPtr>::const_iterator i = toremove.begin(); i != toremove.end(); ++i) {
-        conlist.remove((*i));
+    for (clst_t::const_iterator i = toremove.begin(); i != toremove.end(); ++i) {
+        users_to_search.remove((*i));
     }
 }
 
-void SearchFilterListF(const json_t* node, list<ConnectionPtr>& conlist) {
+void SearchFilterListF(const json_t* node, clst_t& conlist) {
     list<int> items;
-    list<ConnectionPtr> tokeep;
+    clst_t tokeep;
     size_t size = json_array_size(node);
     for (size_t i = 0; i < size; ++i) {
         json_t* jn = json_array_get(node, i);
@@ -233,7 +241,7 @@ void SearchFilterListF(const json_t* node, list<ConnectionPtr>& conlist) {
         }
     }
 
-    for (list<ConnectionPtr>::const_iterator i = conlist.begin(); i != conlist.end(); ++i) {
+    for (clst_t::const_iterator i = conlist.begin(); i != conlist.end(); ++i) {
         bool found = true;
         for (list<int>::const_iterator n = items.begin(); n != items.end(); ++n) {
             if ((*i)->kinkList.find((*n)) == (*i)->kinkList.end()) {
@@ -259,7 +267,6 @@ FReturnCode NativeCommand::SearchCommand(intrusive_ptr< ConnectionInstance >& co
     else
         con->timers[FKSstring] = time;
 
-    typedef list<ConnectionPtr> clst_t;
     clst_t tosearch;
     const conptrmap_t cons = ServerState::getConnections();
     for (conptrmap_t::const_iterator i = cons.begin(); i != cons.end(); ++i) {
@@ -277,30 +284,18 @@ FReturnCode NativeCommand::SearchCommand(intrusive_ptr< ConnectionInstance >& co
     if (json_array_size(kinksnode) > 5)
         return FERR_TOO_MANY_SEARCH_TERMS;
 
-    json_t* gendersnode = json_object_get(rootnode, "genders");
-    if (json_is_array(gendersnode))
-        SearchFilterList(gendersnode, tosearch, "Gender");
-
-    json_t* orientationsnode = json_object_get(rootnode, "orientations");
-    if (json_is_array(orientationsnode))
-        SearchFilterList(orientationsnode, tosearch, "Orientation");
-
-    json_t* languagesnode = json_object_get(rootnode, "languages");
-    if (json_is_array(languagesnode))
-        SearchFilterList(languagesnode, tosearch, "Language preference");
-
-    json_t* furryprefsnode = json_object_get(rootnode, "furryprefs");
-    if (json_is_array(furryprefsnode))
-        SearchFilterList(furryprefsnode, tosearch, "Furry preference");
-
-    json_t* rolesnode = json_object_get(rootnode, "roles");
-    if (json_is_array(rolesnode))
-        SearchFilterList(rolesnode, tosearch, "Dom/Sub Role");
-
-    json_t* positionsnode = json_object_get(rootnode, "positions");
-    if (json_is_array(positionsnode))
-        SearchFilterList(positionsnode, tosearch, "Position");
-
+    SearchFilterList(rootnode, tosearch, "genders", "Gender");
+    SearchFilterList(rootnode, tosearch, "orientations", "Orientation");
+    SearchFilterList(rootnode, tosearch, "languages", "Language preference");
+    SearchFilterList(rootnode, tosearch, "furryprefs", "Furry preference");
+    SearchFilterList(rootnode, tosearch, "roles", "Dom/Sub Role");
+    SearchFilterList(rootnode, tosearch, "positions", "Position");
+    SearchFilterList(rootnode, tosearch, "bodytype", "Body type");
+    SearchFilterList(rootnode, tosearch, "relationships", "Relationship");
+    SearchFilterList(rootnode, tosearch, "builds", "Build");
+    SearchFilterList(rootnode, tosearch, "rp_methods", "Desired RP method");
+    SearchFilterList(rootnode, tosearch, "post_lengths", "Desired post length");
+    
     if (json_array_size(kinksnode) > 0)
         SearchFilterListF(kinksnode, tosearch);
 
