@@ -99,7 +99,7 @@ int LuaConnection::getConnection(lua_State* L) {
         return 1;
     }
     lua_pushboolean(L, true);
-    lua_pushlightuserdata(L, con.get());
+    flua_push_connection(L, con.get());
     return 2;
 }
 
@@ -136,7 +136,7 @@ int LuaConnection::getByAccount(lua_State* L) {
     const conptrmap_t cons = ServerState::getConnections();
     for (conptrmap_t::const_iterator i = cons.begin(); i != cons.end(); ++i) {
         if (i->second->accountID == con->accountID) {
-            lua_pushlightuserdata(L, i->second.get());
+            flua_push_connection(L, i->second.get());
             lua_rawseti(L, -2, n++);
         }
     }
@@ -160,7 +160,7 @@ int LuaConnection::getByAccountID(lua_State* L) {
     const conptrmap_t cons = ServerState::getConnections();
     for (conptrmap_t::const_iterator i = cons.begin(); i != cons.end(); ++i) {
         if (i->second->accountID == accountid) {
-            lua_pushlightuserdata(L, i->second.get());
+            flua_push_connection(L, i->second.get());
             lua_rawseti(L, -2, n++);
         }
     }
@@ -199,7 +199,7 @@ int LuaConnection::getChannels(lua_State* L) {
     lua_newtable(L);
     int i = 1;
     for (chanlist_t::const_iterator itr = con->channelList.begin(); itr != con->channelList.end(); ++itr) {
-        lua_pushlightuserdata(L, (*itr).get());
+        flua_push_channel(L, (*itr).get());
         lua_rawseti(L, -2, i++);
     }
     return 1;

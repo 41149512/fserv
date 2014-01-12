@@ -120,7 +120,7 @@ void ServerState::saveChannels() {
     json_t* publicarray = json_array();
     json_t* privatearray = json_array();
     for (chanptrmap_t::const_iterator i = channelMap.begin(); i != channelMap.end(); ++i) {
-        ChannelPtr chan = i->second;
+        ChannelPtr chan(i->second);
         if (chan->getType() == CT_PUBLIC) {
             json_array_append_new(publicarray, chan->saveChannel());
         } else if (chan->getType() == CT_PUBPRIVATE) {
@@ -503,7 +503,7 @@ void ServerState::rebuildChannelOpList() {
     const chanptrmap_t chans = getChannels();
     for (chanptrmap_t::const_iterator i = chans.begin(); i != chans.end(); ++i) {
         if (i->second->getType() == CT_PUBLIC) {
-            ChannelPtr chan = i->second;
+            ChannelPtr chan(i->second);
             const chmodmap_t mods = chan->getModRecords();
             for (chmodmap_t::const_iterator m = mods.begin(); m != mods.end(); ++m) {
                 if (m->first != "") {

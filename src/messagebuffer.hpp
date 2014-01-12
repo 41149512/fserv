@@ -28,7 +28,7 @@
 
 #include <stddef.h>
 #include <boost/intrusive_ptr.hpp>
-#include <string>
+#include <cstring>
 
 using std::string;
 using boost::intrusive_ptr;

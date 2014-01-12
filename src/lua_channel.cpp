@@ -196,7 +196,7 @@ int LuaChannel::getChannel(lua_State* L) {
         return 1;
     }
     lua_pushboolean(L, true);
-    lua_pushlightuserdata(L, chan.get());
+    flua_push_channel(L, chan.get());
     return 2;
 }
 
@@ -262,7 +262,7 @@ int LuaChannel::createChannel(lua_State* L) {
     Channel* chan = new Channel(name, CT_PUBLIC);
     ServerState::addChannel(name, chan);
 
-    lua_pushlightuserdata(L, chan);
+    flua_push_channel(L, chan);
     return 1;
 }
 
@@ -296,7 +296,7 @@ int LuaChannel::createPrivateChannel(lua_State* L) {
     ServerState::addChannel(namehash, privchan);
 
     lua_pushstring(L, namehash.c_str());
-    lua_pushlightuserdata(L, privchan);
+    flua_push_channel(L, privchan);
     return 2;
 }
 
@@ -318,7 +318,7 @@ int LuaChannel::createSpecialPrivateChannel(lua_State* L) {
     privchan->setCanDestroy(false);
     ServerState::addChannel(name, privchan);
 
-    lua_pushlightuserdata(L, privchan);
+    flua_push_channel(L, privchan);
     return 1;
 }
 
@@ -548,7 +548,7 @@ int LuaChannel::ban(lua_State* L) {
     GETLCHAN(base, L, 1, chan);
     GETLCON(base, L, 2, src);
     int type = lua_type(L, 3);
-    if (type == LUA_TLIGHTUSERDATA) {
+    if (type == LUA_TUSERDATA) {
         GETLCON(base, L, 3, dest);
         chan->ban(src, dest);
     } else if (type == LUA_TSTRING) {
@@ -576,7 +576,7 @@ int LuaChannel::timeout(lua_State* L) {
     GETLCON(base, L, 2, src);
     long length = luaL_checkinteger(L, 4);
     int type = lua_type(L, 3);
-    if (type == LUA_TLIGHTUSERDATA) {
+    if (type == LUA_TUSERDATA) {
         GETLCON(base, L, 3, dest);
         chan->timeout(src, dest, length);
     } else if (type == LUA_TSTRING) {
@@ -620,7 +620,7 @@ int LuaChannel::isBanned(lua_State* L) {
     LBase* base = 0;
     GETLCHAN(base, L, 1, chan);
     int type = lua_type(L, 2);
-    if (type == LUA_TLIGHTUSERDATA) {
+    if (type == LUA_TUSERDATA) {
         GETLCON(base, L, 2, con);
         ret = chan->isBanned(con);
     } else if (type == LUA_TSTRING) {
@@ -648,7 +648,7 @@ int LuaChannel::getBan(lua_State* L) {
     GETLCHAN(base, L, 1, chan);
     int type = lua_type(L, 2);
     BanRecord ban;
-    if (type == LUA_TLIGHTUSERDATA) {
+    if (type == LUA_TUSERDATA) {
         GETLCON(base, L, 2, con);
         ret = chan->getBan(con, ban);
     } else if (type == LUA_TSTRING) {
@@ -842,7 +842,7 @@ int LuaChannel::isMod(lua_State* L) {
     LBase* base = 0;
     GETLCHAN(base, L, 1, chan);
     int type = lua_type(L, 2);
-    if (type == LUA_TLIGHTUSERDATA) {
+    if (type == LUA_TUSERDATA) {
         GETLCON(base, L, 2, con);
         ret = chan->isMod(con);
     } else if (type == LUA_TSTRING) {
@@ -870,7 +870,7 @@ int LuaChannel::isOwner(lua_State* L) {
     LBase* base = 0;
     GETLCHAN(base, L, 1, chan);
     int type = lua_type(L, 2);
-    if (type == LUA_TLIGHTUSERDATA) {
+    if (type == LUA_TUSERDATA) {
         GETLCON(base, L, 2, con);
         ret = chan->isOwner(con);
     } else if (type == LUA_TSTRING) {

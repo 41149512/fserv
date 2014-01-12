@@ -476,7 +476,7 @@ void Server::prepareShutdownConnection(ConnectionInstance* instance) {
         lua_getglobal(sL, "on_error");
         lua_getglobal(sL, "event");
         lua_getfield(sL, -1, "pre_disconnect");
-        lua_pushlightuserdata(sL, instance);
+        flua_push_connection(sL, instance);
         if (lua_pcall(sL, 1, 0, LUA_ABSINDEX(sL, -4))) {
             LOG(WARNING) << "Lua error while calling pre_disconnect. Error returned was: " << lua_tostring(sL, -1);
         }
@@ -656,7 +656,7 @@ FReturnCode Server::processLogin(ConnectionInstance* instance, string& message, 
     lua_getglobal(sL, "on_error");
     lua_getglobal(sL, "event");
     lua_getfield(sL, -1, "ident_callback");
-    lua_pushlightuserdata(sL, instance);
+    flua_push_connection(sL, instance);
     LuaChat::jsonToLua(sL, n);
     json_decref(n);
     if (lua_pcall(sL, 2, 1, LUA_ABSINDEX(sL, -5))) {
@@ -696,7 +696,7 @@ FReturnCode Server::runLuaEvent(ConnectionInstance* instance, string& event, str
         json_decref(root);
         return FERR_UNKNOWN_COMMAND;
     }
-    lua_pushlightuserdata(L, instance);
+    flua_push_connection(L, instance);
     LuaChat::jsonToLua(L, root);
     json_decref(root);
     int ret = lua_pcall(L, 2, 1, LUA_ABSINDEX(L, -5));
@@ -965,7 +965,7 @@ void Server::initLua() {
     DLOG(INFO) << "Initializing Lua.";
 
     sL = luaL_newstate();
-
+    
     lua_pushcfunction(sL, luaopen_base);
     lua_pushstring(sL, "");
     lua_pcall(sL, 1, 0, 0);

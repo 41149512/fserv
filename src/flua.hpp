@@ -26,6 +26,9 @@
 #ifndef FLUA_H
 #define FLUA_H
 
+#include "channel.hpp"
+#include "connection.hpp"
+
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
@@ -35,20 +38,23 @@ extern "C" {
 #define LUA_ABSINDEX(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : \
                                         lua_gettop(L) + (i) + 1)
 
-#define GETLCHAN(lbase, lstate, index, varname) if(lua_type(lstate, index) != LUA_TLIGHTUSERDATA) \
+#define GETLCHAN(lbase, lstate, index, varname) if(lua_type(lstate, index) != LUA_TUSERDATA) \
                                                         return luaL_error(lstate, "#1 Argument "#index" was not a Channel was a %s", lua_typename(lstate, index)); \
-                                                lbase = static_cast<LBase*>(lua_touserdata(lstate, index)); \
+                                                lbase = *static_cast<LBase**>(lua_touserdata(lstate, index)); \
                                                 Channel* varname = dynamic_cast<Channel*>( lbase ); \
                                                 lbase = 0; \
                                                 if( varname == 0 ) \
                                                         return luaL_error(lstate, "#2 Argument "#index" was not a Channel.")
 
-#define GETLCON(lbase, lstate, index, varname) if(lua_type(lstate, index) != LUA_TLIGHTUSERDATA) \
+#define GETLCON(lbase, lstate, index, varname) if(lua_type(lstate, index) != LUA_TUSERDATA) \
                                                         return luaL_error(lstate, "#1 Argument "#index" was not a ConnectionPtr was a %s", lua_typename(lstate, index)); \
-                                                lbase = static_cast<LBase*>(lua_touserdata(lstate, index)); \
+                                                lbase = *static_cast<LBase**>(lua_touserdata(lstate, index)); \
                                                 ConnectionPtr varname(dynamic_cast<ConnectionInstance*>( lbase )); \
                                                 lbase = 0; \
                                                 if( varname == 0 ) \
                                                         return luaL_error(lstate, "#2 Argument "#index" was not a ConnectionPtr.")
+
+void flua_push_channel(lua_State* L, Channel* channel);
+void flua_push_connection(lua_State* L, ConnectionInstance* channel);
 
 #endif //FLUA_H
